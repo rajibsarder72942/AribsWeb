@@ -1,0 +1,44 @@
+---
+import "../styles/global.css";
+import { getDir, otherLocale, useTranslations, type Locale } from "../i18n/utils";
+import { siteConfig } from "../config/site";
+
+interface Props {
+  locale: Locale;
+  title?: string;
+  description?: string;
+}
+
+const { locale, title, description } = Astro.props;
+const t = useTranslations(locale);
+const pageTitle = title ? `${title} | ${siteConfig.name}` : siteConfig.name;
+const alt = otherLocale(locale);
+const altPath = Astro.url.pathname.replace(/^\/(en|ar)/, `/${alt}`);
+---
+
+<!doctype html>
+<html lang={locale} dir={getDir(locale)}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description ?? t("site.tagline")} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" hreflang={alt} href={new URL(altPath, Astro.site)} />
+  </head>
+  <body class="bg-brand-50 font-sans text-brand-900 antialiased">
+    <header class="border-b border-brand-100 bg-white">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+        <a href={`/${locale}/`} class="text-xl font-bold tracking-wide">
+          {siteConfig.name}
+        </a>
+        <a href={altPath} lang={alt} class="text-sm text-brand-700 hover:text-accent-500">
+          {t("lang.switch")}
+        </a>
+      </div>
+    </header>
+    <main class="mx-auto max-w-6xl px-4 py-12">
+      <slot />
+    </main>
+  </body>
+</html>
