@@ -52,7 +52,7 @@ them and will run on-demand routes such as the contact form API. `/` redirects t
 
 1. In hPanel, open **Websites → Add website → Node.js Apps** (or the site's **Node.js** section) and
    connect this GitHub repository (or upload the project files).
-2. Set **Node.js version** to **22.x**.
+2. Set **Node.js version** to **22.x** (22.12 or newer).
 3. **Build command:** `npm ci && npm run build`
 4. **Start command:** `npm start` (runs `node ./dist/server/entry.mjs`)
 5. **Environment variables:** add every key from `.env.example` with real values
