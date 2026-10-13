@@ -1,0 +1,12 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { useTranslations } from "../../i18n/utils";
+
+const locale = "en";
+const t = useTranslations(locale);
+---
+
+<BaseLayout locale={locale}>
+  <h1 class="text-3xl font-bold">{t("home.title")}</h1>
+  <p class="mt-4 text-brand-700">{t("home.intro")}</p>
+</BaseLayout>
