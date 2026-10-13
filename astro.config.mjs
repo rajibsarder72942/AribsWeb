@@ -1,14 +1,22 @@
 // @ts-check
 import { defineConfig, envField } from "astro/config";
+import node from "@astrojs/node";
 import tailwindcss from "@tailwindcss/vite";
 import { loadEnv } from "vite";
 
-// Production URL comes from env (.env or Cloudflare) so the domain is never hardcoded.
+// Production URL comes from env (.env or hosting panel) so the domain is never hardcoded.
 const { PUBLIC_SITE_URL } = loadEnv(process.env.NODE_ENV ?? "production", process.cwd(), "");
 const site = PUBLIC_SITE_URL || "http://localhost:4321";
 
 export default defineConfig({
   site,
+  // Pages stay prerendered (static output); routes opting out with
+  // `export const prerender = false` (e.g. contact API) run on the Node server.
+  output: "static",
+  adapter: node({ mode: "standalone" }),
+  redirects: {
+    "/": "/en/",
+  },
   i18n: {
     locales: ["en", "ar"],
     defaultLocale: "en",
@@ -35,6 +43,10 @@ export default defineConfig({
         access: "secret",
         optional: true,
       }),
+      SMTP_HOST: envField.string({ context: "server", access: "secret", optional: true }),
+      SMTP_PORT: envField.number({ context: "server", access: "secret", optional: true }),
+      SMTP_USER: envField.string({ context: "server", access: "secret", optional: true }),
+      SMTP_PASS: envField.string({ context: "server", access: "secret", optional: true }),
       RESEND_API_KEY: envField.string({ context: "server", access: "secret", optional: true }),
       CONTACT_TO_EMAIL: envField.string({ context: "server", access: "secret", optional: true }),
       CONTACT_FROM_EMAIL: envField.string({ context: "server", access: "secret", optional: true }),
