@@ -1,0 +1,22 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { useTranslations, type Locale, type TranslationKey } from "../i18n/utils";
+
+interface Props {
+  locale: Locale;
+  titleKey: TranslationKey;
+  descriptionKey: TranslationKey;
+}
+
+const { locale, titleKey, descriptionKey } = Astro.props;
+const t = useTranslations(locale);
+---
+
+<BaseLayout locale={locale} title={t(titleKey)} description={t(descriptionKey)}>
+  <h1 class="text-3xl font-bold text-primary md:text-4xl">{t(titleKey)}</h1>
+  <p class="mt-4 max-w-prose text-ink-muted">{t(descriptionKey)}</p>
+  <p class="mt-8 rounded-md border border-dashed border-line bg-surface p-6 text-ink-muted">
+    {t("placeholder.note")}
+  </p>
+  <slot />
+</BaseLayout>

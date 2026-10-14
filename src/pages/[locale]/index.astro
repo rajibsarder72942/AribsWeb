@@ -1,0 +1,30 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { localeStaticPaths, localizedPath, useTranslations, type Locale } from "../../i18n/utils";
+
+export const getStaticPaths = localeStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+const t = useTranslations(locale);
+---
+
+<BaseLayout locale={locale}>
+  <section class="py-8 md:py-16">
+    <h1 class="text-4xl font-bold text-primary md:text-5xl">{t("home.title")}</h1>
+    <p class="mt-4 max-w-2xl text-lg text-ink-muted">{t("home.intro")}</p>
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a
+        href={localizedPath(locale, "products")}
+        class="rounded-md bg-primary px-5 py-3 font-medium text-on-primary hover:bg-primary-hover"
+      >
+        {t("home.ctaProducts")}
+      </a>
+      <a
+        href={localizedPath(locale, "contact")}
+        class="rounded-md border border-primary px-5 py-3 font-medium text-primary hover:bg-surface"
+      >
+        {t("home.ctaContact")}
+      </a>
+    </div>
+  </section>
+</BaseLayout>

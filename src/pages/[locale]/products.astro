@@ -1,0 +1,10 @@
+---
+import PlaceholderPage from "../../components/PlaceholderPage.astro";
+import { localeStaticPaths, type Locale } from "../../i18n/utils";
+
+export const getStaticPaths = localeStaticPaths;
+
+const locale = Astro.params.locale as Locale;
+---
+
+<PlaceholderPage locale={locale} titleKey="products.title" descriptionKey="products.description" />

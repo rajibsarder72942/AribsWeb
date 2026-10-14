@@ -1,0 +1,164 @@
+---
+import { navItems, siteConfig } from "../config/site";
+import {
+  localizedPath,
+  otherLocale,
+  switchLocalePath,
+  useTranslations,
+  type Locale,
+} from "../i18n/utils";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const alt = otherLocale(locale);
+const altPath = switchLocalePath(Astro.url.pathname, alt);
+
+// Normalise to a trailing slash so "/en/about" and "/en/about/" both match.
+const current = Astro.url.pathname.endsWith("/") ? Astro.url.pathname : `${Astro.url.pathname}/`;
+const links = navItems.map((item) => {
+  const href = localizedPath(locale, item.slug);
+  return { href, label: t(item.key), active: current === href };
+});
+---
+
+<header class="sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur">
+  <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+    <a
+      href={localizedPath(locale)}
+      class="text-2xl font-bold tracking-wide text-primary"
+      dir="ltr"
+      aria-label={`${siteConfig.name} — ${t("nav.home")}`}
+    >
+      {siteConfig.name}
+    </a>
+
+    <nav aria-label={t("a11y.mainNav")} class="hidden md:block">
+      <ul class="flex items-center gap-1">
+        {links.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              aria-current={link.active ? "page" : undefined}
+              class:list={[
+                "rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-surface-alt hover:text-primary",
+                link.active ? "text-accent" : "text-ink-muted",
+              ]}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <a
+        href={altPath}
+        lang={alt}
+        hreflang={alt}
+        aria-label={t("lang.switchLabel")}
+        class="rounded-md border border-line px-3 py-1.5 text-sm font-medium text-ink hover:bg-surface-alt"
+      >
+        {t("lang.switch")}
+      </a>
+
+      <button
+        type="button"
+        class="inline-flex size-10 items-center justify-center rounded-md text-ink hover:bg-surface-alt md:hidden"
+        aria-controls="mobile-menu"
+        aria-expanded="false"
+        aria-label={t("a11y.menuOpen")}
+        data-menu-toggle
+        data-label-open={t("a11y.menuOpen")}
+        data-label-close={t("a11y.menuClose")}
+      >
+        <svg
+          class="size-6"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <path data-icon-open stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"></path>
+          <path
+            data-icon-close
+            class="hidden"
+            stroke-linecap="round"
+            d="M6 6l12 12M18 6L6 18"
+          ></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <nav
+    id="mobile-menu"
+    aria-label={t("a11y.mainNav")}
+    class="border-t border-line md:hidden"
+    hidden
+  >
+    <ul class="mx-auto flex max-w-6xl flex-col px-4 py-2">
+      {links.map((link) => (
+        <li>
+          <a
+            href={link.href}
+            aria-current={link.active ? "page" : undefined}
+            class:list={[
+              "block rounded-md px-3 py-3 text-base font-medium hover:bg-surface-alt",
+              link.active ? "text-accent" : "text-ink",
+            ]}
+          >
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>("[data-menu-toggle]");
+  const menu = document.getElementById("mobile-menu");
+
+  if (button && menu) {
+    const iconOpen = button.querySelector("[data-icon-open]");
+    const iconClose = button.querySelector("[data-icon-close]");
+
+    const setOpen = (open: boolean) => {
+      menu.hidden = !open;
+      button.setAttribute("aria-expanded", String(open));
+      button.setAttribute(
+        "aria-label",
+        (open ? button.dataset.labelClose : button.dataset.labelOpen) ?? "",
+      );
+      iconOpen?.classList.toggle("hidden", open);
+      iconClose?.classList.toggle("hidden", !open);
+    };
+
+    const isOpen = () => button.getAttribute("aria-expanded") === "true";
+
+    button.addEventListener("click", () => {
+      const open = !isOpen();
+      setOpen(open);
+      if (open) menu.querySelector<HTMLAnchorElement>("a")?.focus();
+    });
+
+    // Escape closes the menu and returns focus to the toggle button.
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && isOpen()) {
+        setOpen(false);
+        button.focus();
+      }
+    });
+
+    // Close when switching to the desktop layout.
+    window.matchMedia("(min-width: 48rem)").addEventListener("change", (event) => {
+      if (event.matches) setOpen(false);
+    });
+  }
+</script>

@@ -1,17 +1,49 @@
 @import "tailwindcss";
+@import "@fontsource-variable/inter/wght.css";
+@import "@fontsource/ibm-plex-sans-arabic/arabic-400.css";
+@import "@fontsource/ibm-plex-sans-arabic/arabic-600.css";
+@import "@fontsource/ibm-plex-sans-arabic/arabic-700.css";
 
-/* Neutral placeholder palette — replace when brand assets are ready. */
+/*
+ * Design tokens — neutral placeholders until brand assets are ready.
+ * Use semantic names (surface, ink, primary...) in markup so a rebrand only touches this file.
+ * Layout uses logical utilities (ms-/me-/ps-/pe-/start-/end-/text-start) so RTL needs no overrides.
+ */
 @theme {
-  --color-brand-50: #f5f7fa;
-  --color-brand-100: #e4e8ee;
-  --color-brand-500: #475569;
-  --color-brand-700: #334155;
-  --color-brand-900: #0f172a;
-  --color-accent-500: #0d9488;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f5f7fa;
+  --color-line: #e2e8f0;
+  --color-ink: #0f172a;
+  --color-ink-muted: #475569;
+  --color-primary: #1e293b;
+  --color-primary-hover: #334155;
+  --color-on-primary: #ffffff;
+  --color-accent: #0f766e;
+  --color-whatsapp: #25d366;
 
-  --font-sans: "Inter", "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  --font-latin: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: "IBM Plex Sans Arabic", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-latin);
 }
 
-html {
-  scroll-behavior: smooth;
+@layer base {
+  /* Arabic pages switch the default font; Latin text inside falls back to Inter. */
+  html:lang(ar) {
+    --font-sans: var(--font-arabic);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
 }
