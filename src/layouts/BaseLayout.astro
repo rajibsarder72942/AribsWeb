@@ -1,19 +1,39 @@
 ---
 import "../styles/global.css";
-import { getDir, otherLocale, useTranslations, type Locale } from "../i18n/utils";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import WhatsAppButton from "../components/WhatsAppButton.astro";
 import { siteConfig } from "../config/site";
+import {
+  defaultLocale,
+  getDir,
+  locales,
+  ogLocales,
+  otherLocale,
+  switchLocalePath,
+  useTranslations,
+  type Locale,
+} from "../i18n/utils";
 
 interface Props {
   locale: Locale;
   title?: string;
   description?: string;
+  // Absolute or root-relative image URL for social previews.
+  image?: string;
+  ogType?: "website" | "article";
+  noindex?: boolean;
 }
 
-const { locale, title, description } = Astro.props;
+const { locale, title, description, image, ogType = "website", noindex = false } = Astro.props;
 const t = useTranslations(locale);
-const pageTitle = title ? `${title} | ${siteConfig.name}` : siteConfig.name;
-const alt = otherLocale(locale);
-const altPath = Astro.url.pathname.replace(/^\/(en|ar)/, `/${alt}`);
+const pageTitle = title
+  ? `${title} | ${siteConfig.name}`
+  : `${siteConfig.name} — ${t("site.tagline")}`;
+const metaDescription = description ?? t("site.tagline");
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const imageUrl = image ? new URL(image, Astro.site) : undefined;
+const robots = siteConfig.noindex || noindex ? "noindex, nofollow" : "index, follow";
 ---
 
 <!doctype html>
@@ -22,23 +42,50 @@ const altPath = Astro.url.pathname.replace(/^\/(en|ar)/, `/${alt}`);
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
-    <meta name="description" content={description ?? t("site.tagline")} />
+    <meta name="description" content={metaDescription} />
+    <meta name="robots" content={robots} />
+    <link rel="canonical" href={canonical} />
+    {locales.map((l) => (
+      <link
+        rel="alternate"
+        hreflang={l}
+        href={new URL(switchLocalePath(Astro.url.pathname, l), Astro.site)}
+      />
+    ))}
+    <link
+      rel="alternate"
+      hreflang="x-default"
+      href={new URL(switchLocalePath(Astro.url.pathname, defaultLocale), Astro.site)}
+    />
+
+    <meta property="og:site_name" content={siteConfig.name} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={metaDescription} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={ogLocales[locale]} />
+    <meta property="og:locale:alternate" content={ogLocales[otherLocale(locale)]} />
+    {imageUrl && <meta property="og:image" content={imageUrl} />}
+    <meta name="twitter:card" content={imageUrl ? "summary_large_image" : "summary"} />
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="alternate" hreflang={alt} href={new URL(altPath, Astro.site)} />
+    <meta name="theme-color" content="#1e293b" />
+
+    <!-- Page-specific tags (JSON-LD, extra meta) -->
+    <slot name="head" />
   </head>
-  <body class="bg-brand-50 font-sans text-brand-900 antialiased">
-    <header class="border-b border-brand-100 bg-white">
-      <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-        <a href={`/${locale}/`} class="text-xl font-bold tracking-wide">
-          {siteConfig.name}
-        </a>
-        <a href={altPath} lang={alt} class="text-sm text-brand-700 hover:text-accent-500">
-          {t("lang.switch")}
-        </a>
-      </div>
-    </header>
-    <main class="mx-auto max-w-6xl px-4 py-12">
+  <body class="flex min-h-screen flex-col bg-surface-alt font-sans text-ink antialiased">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-surface focus:px-4 focus:py-2 focus:shadow"
+    >
+      {t("a11y.skip")}
+    </a>
+    <Header locale={locale} />
+    <main id="main" tabindex="-1" class="mx-auto w-full max-w-6xl flex-1 px-4 py-12">
       <slot />
     </main>
+    <Footer locale={locale} />
+    <WhatsAppButton locale={locale} />
   </body>
 </html>

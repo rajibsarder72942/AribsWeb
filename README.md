@@ -30,16 +30,33 @@ npm run dev            # http://localhost:4321  (redirects to /en/)
 ## Project structure
 
 ```text
-public/              static files (favicon, robots.txt)
-src/config/site.ts   site-wide settings (name, WhatsApp number from env)
-src/i18n/            en.json, ar.json, translation helpers
-src/layouts/         BaseLayout (sets lang + dir=rtl for Arabic)
-src/pages/en/        English pages  -> /en/...
-src/pages/ar/        Arabic pages   -> /ar/...
-src/styles/          Tailwind entry + placeholder theme colors
+public/                    static files (favicon)
+src/config/site.ts         site settings (name, CR number, nav, env-driven WhatsApp/noindex)
+src/i18n/                  en.json, ar.json, translation + locale path helpers
+src/styles/global.css      Tailwind entry, design tokens, self-hosted fonts (@fontsource)
+src/layouts/BaseLayout     <html lang/dir>, SEO head (canonical, hreflang, Open Graph)
+src/components/            Header (nav, mobile menu, language switcher), Footer,
+                           WhatsAppButton, PlaceholderPage
+src/pages/[locale]/        one file per page, built for both /en/... and /ar/...
+src/pages/robots.txt.ts    robots.txt (Disallow all when PUBLIC_NOINDEX=true)
 ```
 
+### Design notes
+
+- Colours and fonts are tokens in `src/styles/global.css` (`surface`, `ink`, `primary`, `accent`…).
+  Replace the values there when brand assets are ready.
+- Use logical utilities (`ms-*`, `me-*`, `ps-*`, `pe-*`, `start-*`, `end-*`, `text-start`) instead
+  of left/right so Arabic (RTL) works without duplicate styles.
+- Fonts: Inter (Latin) and IBM Plex Sans Arabic, self-hosted via `@fontsource` (no Google Fonts CDN).
+
 ## Environment variables
+
+| Key                                                                                   | Purpose                                                                 |
+| ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `PUBLIC_SITE_URL`                                                                     | Full site URL, used for canonical/hreflang/Open Graph URLs              |
+| `PUBLIC_WHATSAPP_NUMBER`                                                              | Digits only, e.g. `9689XXXXXXX`; empty hides the WhatsApp button        |
+| `PUBLIC_NOINDEX`                                                                      | `true` on staging → `noindex, nofollow` meta + robots.txt `Disallow: /` |
+| `PUBLIC_TURNSTILE_*`, `TURNSTILE_SECRET_KEY`, `SMTP_*`, `CONTACT_*`, `RESEND_API_KEY` | Contact form (later phase)                                              |
 
 All keys are listed in `.env.example`. Domain, WhatsApp number, recipient email and API keys
 live only in env — never in code. On Hostinger, set them in the Node.js app's
@@ -58,6 +75,7 @@ them and will run on-demand routes such as the contact form API. `/` redirects t
 5. **Environment variables:** add every key from `.env.example` with real values
    (`PUBLIC_SITE_URL`, `PUBLIC_WHATSAPP_NUMBER`, Turnstile keys, `SMTP_*`, `CONTACT_TO_EMAIL`,
    `CONTACT_FROM_EMAIL`). `PUBLIC_*` values are baked in at build time, so rebuild after changing them.
+   On staging (e.g. `staging.aribs.net`) set `PUBLIC_NOINDEX=true`; leave it unset in production.
    Hostinger normally provides `PORT`; the server also reads `HOST` (use `0.0.0.0`).
 6. Deploy, then check that `/`, `/en/` and `/ar/` load on your domain.
 

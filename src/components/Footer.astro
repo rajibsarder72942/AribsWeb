@@ -1,0 +1,59 @@
+---
+import { navItems, siteConfig } from "../config/site";
+import { localizedPath, useTranslations, type Locale } from "../i18n/utils";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+// Rendered at build time; a rebuild/redeploy updates it.
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-auto border-t border-line bg-primary text-on-primary">
+  <div class="mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-3">
+    <div>
+      <p class="text-xl font-bold tracking-wide" dir="ltr">
+        {siteConfig.name}
+      </p>
+      <p class="mt-2 text-sm opacity-80">{t("site.tagline")}</p>
+    </div>
+
+    <address class="text-sm not-italic opacity-80">
+      <p>{t("footer.address")}</p>
+      <p class="mt-1">
+        {t("footer.cr")}: <span dir="ltr">{siteConfig.crNumber}</span>
+      </p>
+    </address>
+
+    <nav aria-label={t("a11y.footerNav")}>
+      <ul class="grid grid-cols-2 gap-2 text-sm">
+        {navItems.map((item) => (
+          <li>
+            <a href={localizedPath(locale, item.slug)} class="opacity-80 hover:opacity-100">
+              {t(item.key)}
+            </a>
+          </li>
+        ))}
+        <li>
+          <a href={localizedPath(locale, "privacy")} class="opacity-80 hover:opacity-100">
+            {t("nav.privacy")}
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="border-t border-white/15">
+    <!-- Extra bottom space on mobile so the floating WhatsApp button does not cover text -->
+    <p class="mx-auto max-w-6xl px-4 pt-4 pb-20 text-xs opacity-70 md:pb-4">
+      &copy;{" "}
+      <span dir="ltr">
+        {year} {siteConfig.name}
+      </span>
+      . {t("footer.rights")}
+    </p>
+  </div>
+</footer>

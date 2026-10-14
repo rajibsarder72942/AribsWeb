@@ -33,6 +33,13 @@ export default defineConfig({
         access: "public",
         optional: true,
       }),
+      // "true" on staging: adds noindex meta and a Disallow-all robots.txt (build time)
+      PUBLIC_NOINDEX: envField.boolean({
+        context: "client",
+        access: "public",
+        optional: true,
+        default: false,
+      }),
       PUBLIC_TURNSTILE_SITE_KEY: envField.string({
         context: "client",
         access: "public",
